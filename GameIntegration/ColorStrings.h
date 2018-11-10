@@ -21,8 +21,8 @@ namespace Color
 		COLOR_BPURPLE,
 		COLOR_BYELLOW,
 		COLOR_BWHITE,
-		COLOR_BGRAY,
 	} Color;
 
 	void printcolor(std::string str, Color color = COLOR_RESET);
+
 }

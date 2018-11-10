@@ -21,12 +21,12 @@ void LandMap::printMap(LandMap::map_t& map)
 	}
 }
 
-int LandMap::neighborCountLand(LandMap::map_t& map, uint8_t x, uint8_t y, bool includeEdges, bool onlyAdjacents)
+int LandMap::neighborCountLand(LandMap::map_t& map, uint8_t x, uint8_t y, bool includeEdges, bool onlyAdjacents, int farness)
 {
 	int count = 0;
-	for (int y2 = -1; y2 <= 1; ++y2)
+	for (int y2 = -farness; y2 <= farness; ++y2)
 	{
-		for (int x2 = -1; x2 <= 1; ++x2)
+		for (int x2 = -farness; x2 <= farness; ++x2)
 		{
 			int neighbor_x = x + x2;
 			int neighbor_y = y + y2;
@@ -54,12 +54,12 @@ int LandMap::neighborCountLand(LandMap::map_t& map, uint8_t x, uint8_t y, bool i
 	return count;
 }
 
-int LandMap::neighborCountWater(LandMap::map_t& map, uint8_t x, uint8_t y, bool includeEdges, bool onlyAdjacents)
+int LandMap::neighborCountWater(LandMap::map_t& map, uint8_t x, uint8_t y, bool includeEdges, bool onlyAdjacents, int farness)
 {
 	int count = 0;
-	for (int y2 = -1; y2 <= 1; ++y2)
+	for (int y2 = -farness; y2 <= farness; ++y2)
 	{
-		for (int x2 = -1; x2 <= 1; ++x2)
+		for (int x2 = -farness; x2 <= farness; ++x2)
 		{
 			int neighbor_x = x + x2;
 			int neighbor_y = y + y2;
@@ -191,25 +191,70 @@ void BioMap::printMap(map_t& map)
 		{
 			Biomes::biome_t& biome = map[y][x];
 
-			if (biome.stat == Biomes::STAT_PLAIN_CLEAR)
+			switch (biome.stat)
 			{
-				Color::printcolor("XX", Color::COLOR_GREEN);
+			case (Biomes::STAT_PLAIN_CLEAR):
+			{
+				Color::printcolor("XX", Color::COLOR_BGREEN);
+				break;
 			}
-			if (biome.stat == Biomes::STAT_WATER_SHALLOW)
+			case (Biomes::STAT_PLAIN_GRASS):
+			{
+				Color::printcolor("==", Color::COLOR_BGREEN);
+				break;
+			}
+			case (Biomes::STAT_PLAIN_FRUIT):
+			{
+				Color::printcolor(".o", Color::COLOR_RED);
+				break;
+			}
+			case (Biomes::STAT_WATER_SHALLOW):
 			{
 				Color::printcolor("~~", Color::COLOR_BBLUE);
+				break;
 			}
-			if (biome.stat == Biomes::STAT_WATER_DEEP)
+			case (Biomes::STAT_WATER_FISH):
+			{
+				Color::printcolor("0<", Color::COLOR_BBLUE);
+				break;
+			}
+			case (Biomes::STAT_WATER_DEEP):
 			{
 				Color::printcolor("~~", Color::COLOR_BLUE);
+				break;
 			}
-			if (biome.stat == Biomes::STAT_MOUNTAIN_CLEAR)
+			case (Biomes::STAT_WATER_WHALE):
 			{
-				Color::printcolor("^^", Color::COLOR_BWHITE);
+				Color::printcolor("0<", Color::COLOR_BLUE);
+				break;
 			}
-			if (biome.stat == Biomes::STAT_VILLAGE_UNCLAIMED)
+			case (Biomes::STAT_MOUNTAIN_CLEAR):
+			{
+				Color::printcolor("/^", Color::COLOR_BWHITE);
+				break;
+			}
+			case (Biomes::STAT_MOUNTAIN_GOLD):
+			{
+				Color::printcolor("^", Color::COLOR_BYELLOW);
+				Color::printcolor("\\", Color::COLOR_BWHITE);
+				break;
+			}
+			case (Biomes::STAT_FOREST_CLEAR):
+			{
+				Color::printcolor("||", Color::COLOR_GREEN);
+				break;
+			}
+			case (Biomes::STAT_FOREST_HUNT):
+			{
+				Color::printcolor(".", Color::COLOR_GRAY);
+				Color::printcolor("|", Color::COLOR_GREEN);
+				break;
+			}
+			case (Biomes::STAT_VILLAGE_UNCLAIMED):
 			{
 				Color::printcolor("<>", Color::COLOR_YELLOW);
+				break;
+			}
 			}
 
 		}
@@ -219,11 +264,11 @@ void BioMap::printMap(map_t& map)
 	Color::printcolor("\n");
 }
 
-int BioMap::findNeighbor(map_t& map, uint8_t x, uint8_t y, Biomes::state_t stat)
+int BioMap::findNeighbor(map_t& map, uint8_t x, uint8_t y, Biomes::state_t stat, int farness)
 {
-	for (int y2 = -1; y2 <= 1; ++y2)
+	for (int y2 = -farness; y2 <= farness; ++y2)
 	{
-		for (int x2 = -1; x2 <= 1; ++x2)
+		for (int x2 = -farness; x2 <= farness; ++x2)
 		{
 			int neighbor_x = x + x2;
 			int neighbor_y = y + y2;
@@ -251,32 +296,72 @@ void BioMap::Generator::geoCopy(LandMap::map_t& lmap, map_t& map)
 		for (uint8_t x = 0; x < mapw; ++x)
 		{
 			int nbsl = LandMap::neighborCountLand(lmap, x, y, false, true);
+			int farnbsl = LandMap::neighborCountLand(lmap, x, y, false, true, 2);
 			int nbsw = LandMap::neighborCountWater(lmap, x, y, false, true);
 
 			if (!lmap[y][x])
 			{
 				if (nbsl)
 				{
-					map[y][x].stat = Biomes::STAT_WATER_SHALLOW;
+					if (Random::random() < spawnChanceFish)
+					{
+						map[y][x].stat = Biomes::STAT_WATER_FISH;
+					}
+					else
+					{
+						map[y][x].stat = Biomes::STAT_WATER_SHALLOW;
+					}
 				}
 				else
 				{
-					map[y][x].stat = Biomes::STAT_WATER_DEEP;
+					if (farnbsl && Random::random() < spawnChanceWhale)
+					{
+						map[y][x].stat = Biomes::STAT_WATER_WHALE;
+					}
+					else
+					{
+						map[y][x].stat = Biomes::STAT_WATER_DEEP;
+					}
 				}
 			}
 			else
 			{
-				if (!nbsw && Random::random() < mountainSpawnChance)
+				if (!nbsw && Random::random() < spawnChanceMountain)
 				{
-					map[y][x].stat = Biomes::STAT_MOUNTAIN_CLEAR;
+					if (Random::random() < spawnChanceGold)
+					{
+						map[y][x].stat = Biomes::STAT_MOUNTAIN_GOLD;
+					}
+					else
+					{
+						map[y][x].stat = Biomes::STAT_MOUNTAIN_CLEAR;
+					}
 				}
-				else if (Random::random() < forestSpawnChance)
+				else if (Random::random() < spawnChanceForest)
 				{
-					map[y][x].stat = Biomes::STAT_FOREST_CLEAR;
+					if (Random::random() < spawnChanceHunt)
+					{
+						map[y][x].stat = Biomes::STAT_FOREST_HUNT;
+					}
+					else
+					{
+						map[y][x].stat = Biomes::STAT_FOREST_CLEAR;
+					}
 				}
 				else
 				{
-					map[y][x].stat = Biomes::STAT_PLAIN_CLEAR;
+					if (Random::random() < spawnChanceFruit)
+					{
+						map[y][x].stat = Biomes::STAT_PLAIN_FRUIT;
+					}
+					else if (Random::random() < spawnChanceGrass)
+					{
+						map[y][x].stat = Biomes::STAT_PLAIN_GRASS;
+					}
+					else
+					{
+						map[y][x].stat = Biomes::STAT_PLAIN_CLEAR;
+					}
 				}
 			}
 		}
@@ -284,8 +369,56 @@ void BioMap::Generator::geoCopy(LandMap::map_t& lmap, map_t& map)
 
 }
 
-void BioMap::Generator::placeVillages(map_t & map)
+void BioMap::Generator::placeVillages(map_t& map)
 {
+	biovec fields;
+
+	for (uint8_t y = 0; y < maph; ++y)
+	{
+		for (uint8_t x = 0; x < mapw; ++x)
+		{
+			if (map[y][x].stat == Biomes::STAT_PLAIN_CLEAR)
+			{
+				fields.push_back({ &map[y][x], { x, y } });
+			}
+		}
+	}
+
+	while (fields.size())
+	{
+		auto village = Random::random_element(fields.begin(), fields.end());
+		if (village != fields.end())
+		{
+			village->first->stat = Biomes::STAT_VILLAGE_UNCLAIMED;
+
+			uint8_t vx = village->second.first;
+			uint8_t vy = village->second.second;
+
+			fields.erase(village);
+
+			auto i = std::begin(fields);
+			while (i != std::end(fields)) 
+			{
+				uint8_t fx = i->second.first;
+				uint8_t fy = i->second.second;
+
+				if (abs(fx - vx) + abs(fy - vy) < villageSpawnDistance)
+				{
+					i = fields.erase(i);
+				}
+				else
+				{
+					++i;
+				}
+			}
+
+		}
+		else
+		{
+			break;
+		}
+	}
+
 }
 
 BioMap::map_t BioMap::Generator::generate(LandMap::map_t lmap)
