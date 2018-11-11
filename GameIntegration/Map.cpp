@@ -168,7 +168,6 @@ void LandMap::Generator::finalStep(map_t & map)
 	} while (newMap != map); // if newMap != map, repeat edge-cull process
 }
 
-
 LandMap::map_t LandMap::Generator::generate()
 {
 	map_t map;
@@ -184,9 +183,19 @@ LandMap::map_t LandMap::Generator::generate()
 
 void BioMap::printMap(map_t& map)
 {
+	Color::printcolor("\t   ");
+	for (uint8_t x = 0; x < mapw; ++x)
+	{
+		std::string str = (std::to_string(x) + " ").substr(0, 2);
+		Color::printcolor(str);
+	}
+	Color::printcolor("\n");
+
 	for (uint8_t y = 0; y < maph; ++y)
 	{
-		Color::printcolor("\t");
+		Color::printcolor("\t");		
+		Color::printcolor((std::to_string(y) + "  ").substr(0, 3));
+
 		for (uint8_t x = 0; x < mapw; ++x)
 		{
 			Biomes::biome_t& biome = map[y][x];
@@ -195,6 +204,11 @@ void BioMap::printMap(map_t& map)
 			{
 			case (Biomes::STAT_PLAIN_CLEAR):
 			{
+				if (biome.hasResource)
+				{
+					Color::printcolor(".o", Color::COLOR_RED);
+					break;
+				}
 				Color::printcolor("XX", Color::COLOR_BGREEN);
 				break;
 			}
@@ -203,51 +217,46 @@ void BioMap::printMap(map_t& map)
 				Color::printcolor("==", Color::COLOR_BGREEN);
 				break;
 			}
-			case (Biomes::STAT_PLAIN_FRUIT):
-			{
-				Color::printcolor(".o", Color::COLOR_RED);
-				break;
-			}
 			case (Biomes::STAT_WATER_SHALLOW):
 			{
+				if (biome.hasResource)
+				{
+					Color::printcolor("0<", Color::COLOR_BBLUE);
+					break;
+				}
 				Color::printcolor("~~", Color::COLOR_BBLUE);
-				break;
-			}
-			case (Biomes::STAT_WATER_FISH):
-			{
-				Color::printcolor("0<", Color::COLOR_BBLUE);
 				break;
 			}
 			case (Biomes::STAT_WATER_DEEP):
 			{
+				if (biome.hasResource)
+				{
+					Color::printcolor("0<", Color::COLOR_BLUE);
+					break;
+				}
 				Color::printcolor("~~", Color::COLOR_BLUE);
-				break;
-			}
-			case (Biomes::STAT_WATER_WHALE):
-			{
-				Color::printcolor("0<", Color::COLOR_BLUE);
 				break;
 			}
 			case (Biomes::STAT_MOUNTAIN_CLEAR):
 			{
+				if (biome.hasResource)
+				{
+					Color::printcolor("^", Color::COLOR_BYELLOW);
+					Color::printcolor("\\", Color::COLOR_BWHITE);
+					break;
+				}
 				Color::printcolor("/^", Color::COLOR_BWHITE);
-				break;
-			}
-			case (Biomes::STAT_MOUNTAIN_GOLD):
-			{
-				Color::printcolor("^", Color::COLOR_BYELLOW);
-				Color::printcolor("\\", Color::COLOR_BWHITE);
 				break;
 			}
 			case (Biomes::STAT_FOREST_CLEAR):
 			{
+				if (biome.hasResource)
+				{
+					Color::printcolor(".", Color::COLOR_GRAY);
+					Color::printcolor("|", Color::COLOR_GREEN);
+					break;
+				}
 				Color::printcolor("||", Color::COLOR_GREEN);
-				break;
-			}
-			case (Biomes::STAT_FOREST_HUNT):
-			{
-				Color::printcolor(".", Color::COLOR_GRAY);
-				Color::printcolor("|", Color::COLOR_GREEN);
 				break;
 			}
 			case (Biomes::STAT_VILLAGE_UNCLAIMED):
@@ -303,24 +312,18 @@ void BioMap::Generator::geoCopy(LandMap::map_t& lmap, map_t& map)
 			{
 				if (nbsl)
 				{
+					map[y][x].stat = Biomes::STAT_WATER_SHALLOW;
 					if (Random::random() < spawnChanceFish)
 					{
-						map[y][x].stat = Biomes::STAT_WATER_FISH;
-					}
-					else
-					{
-						map[y][x].stat = Biomes::STAT_WATER_SHALLOW;
+						map[y][x].hasResource = true;
 					}
 				}
 				else
 				{
+					map[y][x].stat = Biomes::STAT_WATER_DEEP;
 					if (farnbsl && Random::random() < spawnChanceWhale)
 					{
-						map[y][x].stat = Biomes::STAT_WATER_WHALE;
-					}
-					else
-					{
-						map[y][x].stat = Biomes::STAT_WATER_DEEP;
+						map[y][x].hasResource = true;
 					}
 				}
 			}
@@ -328,39 +331,33 @@ void BioMap::Generator::geoCopy(LandMap::map_t& lmap, map_t& map)
 			{
 				if (!nbsw && Random::random() < spawnChanceMountain)
 				{
+					map[y][x].stat = Biomes::STAT_MOUNTAIN_CLEAR;
 					if (Random::random() < spawnChanceGold)
 					{
-						map[y][x].stat = Biomes::STAT_MOUNTAIN_GOLD;
-					}
-					else
-					{
-						map[y][x].stat = Biomes::STAT_MOUNTAIN_CLEAR;
+						map[y][x].hasResource = true;
 					}
 				}
 				else if (Random::random() < spawnChanceForest)
 				{
+					map[y][x].stat = Biomes::STAT_FOREST_CLEAR;
 					if (Random::random() < spawnChanceHunt)
 					{
-						map[y][x].stat = Biomes::STAT_FOREST_HUNT;
-					}
-					else
-					{
-						map[y][x].stat = Biomes::STAT_FOREST_CLEAR;
+						map[y][x].hasResource = true;
 					}
 				}
 				else
 				{
-					if (Random::random() < spawnChanceFruit)
-					{
-						map[y][x].stat = Biomes::STAT_PLAIN_FRUIT;
-					}
-					else if (Random::random() < spawnChanceGrass)
+					if (Random::random() < spawnChanceGrass)
 					{
 						map[y][x].stat = Biomes::STAT_PLAIN_GRASS;
 					}
 					else
 					{
 						map[y][x].stat = Biomes::STAT_PLAIN_CLEAR;
+						if (Random::random() < spawnChanceFruit)
+						{
+							map[y][x].hasResource = true;
+						}
 					}
 				}
 			}

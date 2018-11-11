@@ -24,10 +24,13 @@ namespace Random
 		const unsigned long size = std::distance(begin, end) - 1;
 
 		if (size)
+		{
 			std::advance(begin, generator() % size);
+			return begin;
+		}
 		else
+		{
 			return end;
-
-		return begin;
+		}
 	}
 }

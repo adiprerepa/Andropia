@@ -36,7 +36,7 @@ namespace LandMap
 
 namespace Game
 {
-	class Object;
+	struct Object;
 }
 
 namespace BioMap
@@ -56,9 +56,8 @@ namespace BioMap
 		{
 			// plain						//forest						// water						// mountain						// city
 			STAT_PLAIN_CLEAR,				STAT_FOREST_CLEAR,				STAT_WATER_SHALLOW,				STAT_MOUNTAIN_CLEAR,			STAT_VILLAGE_UNCLAIMED,
-			STAT_PLAIN_FRUIT,				STAT_FOREST_HUNT,				STAT_WATER_FISH,				STAT_MOUNTAIN_GOLD,
-			STAT_PLAIN_FARM,												STAT_WATER_DEEP,				STAT_MOUNTAIN_MINE,
-			STAT_PLAIN_GRASS,												STAT_WATER_WHALE,
+			STAT_PLAIN_GRASS,												STAT_WATER_DEEP,
+															
 		} state_t;
 
 		typedef enum
@@ -70,6 +69,8 @@ namespace BioMap
 		{
 			specialty_t spec : 5; // dependent on type, see enum
 			state_t stat : 17; // dependent on type, see enum
+			uint8_t hasResource : 1;
+			std::bitset<8> visible;
 			Game::Object * gameobj;
 		};
 	}
@@ -91,7 +92,7 @@ namespace BioMap
 		const double spawnChanceForest = .3;
 		const double spawnChanceHunt = .4;
 		const double spawnChanceFruit = 0.1;
-		const double spawnChanceGrass = 0.1;
+		const double spawnChanceGrass = 0.;
 		const int villageSpawnDistance = 4;
 
 		void geoCopy(LandMap::map_t& lmap, map_t& map);
