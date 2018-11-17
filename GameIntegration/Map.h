@@ -79,7 +79,7 @@ namespace BioMap
 
 	typedef std::vector <std::pair<Biomes::biome_t *, std::pair<uint8_t, uint8_t>>> biovec;
 
-	void printMap(map_t& map);
+	void printMap(map_t& map, int selectx = -1, int selecty = -1);
 
 	int findNeighbor(map_t& map, uint8_t x, uint8_t y, Biomes::state_t stat, int farness = 1);
 

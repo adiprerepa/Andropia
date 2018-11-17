@@ -1,3 +1,4 @@
+#pragma once
 #include "Map.h"
 
 namespace Game
@@ -20,8 +21,12 @@ namespace Game
 		uint8_t x;
 		uint8_t y;
 
-		void autoUpdate();
+		virtual bool autoUpdate();
 
-		void move();
+		virtual bool move();
+
+		virtual bool destroy();
+
+		virtual bool update();
 	};
 };

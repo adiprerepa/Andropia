@@ -3,9 +3,26 @@
 
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
-void Color::printcolor(std::string str, Color color)
+const char colcatc(Color::ForeColor fcolor, Color::BackColor bcolor)
 {
-	SetConsoleTextAttribute(hConsole, color);
+	return fcolor + (bcolor << 4);
+}
+
+const char COLOR_RESET = colcatc(Color::FORECOLOR_RESET, Color::BACKCOLOR_RESET);
+
+void Color::print(std::string str, ForeColor fcolor, BackColor bcolor)
+{
+	SetConsoleTextAttribute(hConsole, colcatc(fcolor, bcolor));
 	printf("%s", str.c_str());
-	SetConsoleTextAttribute(hConsole, Color::COLOR_RESET);
+	SetConsoleTextAttribute(hConsole, COLOR_RESET);
+}
+
+void Color::printcolors(std::string str)
+{
+	for (unsigned char k = 1; k != 0; ++k)
+	{
+		SetConsoleTextAttribute(hConsole, k);
+		printf("%i %s\n", k, str.c_str());
+	}
+	SetConsoleTextAttribute(hConsole, COLOR_RESET);
 }

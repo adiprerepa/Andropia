@@ -10,14 +10,14 @@ void LandMap::printMap(LandMap::map_t& map)
 		{
 			if (map[y][x])
 			{
-				Color::printcolor("XX", Color::Color::COLOR_GREEN);
+				Color::print("XX", Color::FORECOLOR_DARKGREEN);
 			}
 			else
 			{
-				Color::printcolor("~~", Color::Color::COLOR_BLUE);
+				Color::print("~~", Color::FORECOLOR_DARKBLUE);
 			}
 		}
-		Color::printcolor("\n");
+		Color::print("\n");
 	}
 }
 
@@ -181,24 +181,31 @@ LandMap::map_t LandMap::Generator::generate()
 	return map;
 }
 
-void BioMap::printMap(map_t& map)
+void BioMap::printMap(map_t& map, int selectx, int selecty)
 {
-	Color::printcolor("\t   ");
+	Color::print("\t   ");
 	for (uint8_t x = 0; x < mapw; ++x)
 	{
 		std::string str = (std::to_string(x) + " ").substr(0, 2);
-		Color::printcolor(str);
+		Color::print(str);
 	}
-	Color::printcolor("\n");
+	Color::print("\n");
 
 	for (uint8_t y = 0; y < maph; ++y)
 	{
-		Color::printcolor("\t");		
-		Color::printcolor((std::to_string(y) + "  ").substr(0, 3));
+		Color::print("\t");		
+		Color::print((std::to_string(y) + "  ").substr(0, 3));
 
 		for (uint8_t x = 0; x < mapw; ++x)
 		{
 			Biomes::biome_t& biome = map[y][x];
+
+			Color::BackColor bg = Color::BACKCOLOR_RESET;
+
+			if (selectx == x && selecty == y)
+			{
+				bg = Color::BACKCOLOR_LIGHTGRAY;
+			}
 
 			switch (biome.stat)
 			{
@@ -206,71 +213,71 @@ void BioMap::printMap(map_t& map)
 			{
 				if (biome.hasResource)
 				{
-					Color::printcolor(".o", Color::COLOR_RED);
+					Color::print(".o", Color::FORECOLOR_DARKRED, bg);
 					break;
 				}
-				Color::printcolor("XX", Color::COLOR_BGREEN);
+				Color::print("XX", Color::FORECOLOR_LIGHTGREEN, bg);
 				break;
 			}
 			case (Biomes::STAT_PLAIN_GRASS):
 			{
-				Color::printcolor("==", Color::COLOR_BGREEN);
+				Color::print("==", Color::FORECOLOR_LIGHTGREEN, bg);
 				break;
 			}
 			case (Biomes::STAT_WATER_SHALLOW):
 			{
 				if (biome.hasResource)
 				{
-					Color::printcolor("0<", Color::COLOR_BBLUE);
+					Color::print("0<", Color::FORECOLOR_LIGHTBLUE, bg);
 					break;
 				}
-				Color::printcolor("~~", Color::COLOR_BBLUE);
+				Color::print("~~", Color::FORECOLOR_LIGHTBLUE, bg);
 				break;
 			}
 			case (Biomes::STAT_WATER_DEEP):
 			{
 				if (biome.hasResource)
 				{
-					Color::printcolor("0<", Color::COLOR_BLUE);
+					Color::print("0<", Color::FORECOLOR_DARKBLUE, bg);
 					break;
 				}
-				Color::printcolor("~~", Color::COLOR_BLUE);
+				Color::print("~~", Color::FORECOLOR_DARKBLUE, bg);
 				break;
 			}
 			case (Biomes::STAT_MOUNTAIN_CLEAR):
 			{
 				if (biome.hasResource)
 				{
-					Color::printcolor("^", Color::COLOR_BYELLOW);
-					Color::printcolor("\\", Color::COLOR_BWHITE);
+					Color::print("^", Color::FORECOLOR_DARKYELLOW, bg);
+					Color::print("\\", Color::FORECOLOR_WHITE, bg);
 					break;
 				}
-				Color::printcolor("/^", Color::COLOR_BWHITE);
+				Color::print("/^", Color::FORECOLOR_WHITE, bg);
 				break;
 			}
 			case (Biomes::STAT_FOREST_CLEAR):
 			{
 				if (biome.hasResource)
 				{
-					Color::printcolor(".", Color::COLOR_GRAY);
-					Color::printcolor("|", Color::COLOR_GREEN);
+					Color::print(".", Color::FORECOLOR_DARKGRAY, bg);
+					Color::print("|", Color::FORECOLOR_DARKGREEN, bg);
 					break;
 				}
-				Color::printcolor("||", Color::COLOR_GREEN);
+				Color::print("||", Color::FORECOLOR_DARKGREEN, bg);
 				break;
 			}
 			case (Biomes::STAT_VILLAGE_UNCLAIMED):
 			{
-				Color::printcolor("<>", Color::COLOR_YELLOW);
+				Color::print("<>", Color::FORECOLOR_DARKYELLOW, bg);
 				break;
 			}
 			}
 
 		}
-		Color::printcolor("\n");
+		Color::print("\n");
 	}
 
-	Color::printcolor("\n");
+	Color::print("\n");
 }
 
 int BioMap::findNeighbor(map_t& map, uint8_t x, uint8_t y, Biomes::state_t stat, int farness)
