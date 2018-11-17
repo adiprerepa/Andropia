@@ -58,7 +58,10 @@ public class Client  {
 		
 		String msg = "Connection accepted " + socket.getInetAddress() + ":" + socket.getPort();
 		display(msg);
-	
+		display("Whats goody. Its ur boi, Back at it again with the servers.");
+		display("This is in beta.");
+		display("No fix to newline error...Sorry guys..Itl happen soon.");
+		display("PoopDiidyWiipCuuip.");	
 		/* Creating both Data Stream */
 		try
 		{
@@ -201,6 +204,11 @@ public class Client  {
 				client.sendMessage(new ChatMessage(ChatMessage.LOGOUT, ""));
 				// break to do the disconnect
 				break;
+			}
+			else if(msg.equalsIgnoreCase("KMS")) {
+				client.sendMessage(new ChatMessage(ChatMessage.KMS, ""));
+				break;
+
 			}
 			// message WhoIsIn
 			else if(msg.equalsIgnoreCase("WHOISIN")) {
